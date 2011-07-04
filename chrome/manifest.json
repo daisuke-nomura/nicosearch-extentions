@@ -1,0 +1,26 @@
+{
+  "name": "nicosearch Chrome版",
+  "version": "1",
+  "description": "ニコニコ動画でサジェストを使うnicosearchのChrome拡張",
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon.png"
+  },
+  "permissions": [
+    "http://nicotools.com/"
+  ],
+  "background_page": "bg.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "http://www.nicovideo.jp/*",
+        "http://seiga.nicovideo.jp/*",
+        "http://live.nicovideo.jp/*",
+        "http://dic.nicovideo.jp/*"
+      ],
+      "js": ["cs.js"],
+      "css": ["suggest.css"],
+      "run_at": "document_end"
+    }
+  ]
+}
