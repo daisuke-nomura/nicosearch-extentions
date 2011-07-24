@@ -1,6 +1,6 @@
 {
   "name": "nicosearch Chrome版",
-  "version": "2",
+  "version": "2.1",
   "description": "ニコニコ動画でサジェストを使うnicosearchのChrome拡張",
   "icons": {
     "48": "icon48.png",
