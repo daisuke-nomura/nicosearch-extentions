@@ -14,6 +14,7 @@ var suggestlength = null; //現在表示されている候補の数
 var page = null; // ページの種類
 var tag_event_added = false; // タグ編集のイベントが追加されていればtrue
 var inputcount = 0; // 入力欄の番号
+var tag_suggest_id = null;
 // 読み込み
 function loadJSON(str, cb) {
   chrome.extension.sendRequest({name: "loadJSON", str: str}, cb);
@@ -198,6 +199,7 @@ function makesuggest(input) {
   });
   input.setAttribute("autocomplete", "off");
   inputcount = inputcount + 1;
+  return id;
 }
 
 function main() {
@@ -237,8 +239,13 @@ function main() {
     if (tagedit != [] && tagedit != undefined) {
       tagedit.addEventListener("DOMSubtreeModified", function() {
         if (!tag_event_added) {
-          makesuggest(document.getElementsByName("tag")[0]);
+          tag_suggest_id = makesuggest(document.getElementsByName("tag")[0]);
           tag_event_added = true;
+        }
+        else {
+          // タグ編集欄が消えた時
+          document.body.removeChild(document.getElementById("suggestelem_" + tag_suggest_id.toString()));
+          tag_event_added = false;
         }
       });
     }
