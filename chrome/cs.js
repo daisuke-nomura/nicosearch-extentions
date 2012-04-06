@@ -14,7 +14,8 @@ var suggestlength = null; //現在表示されている候補の数
 var page = null; // ページの種類
 var tag_event_added = false; // タグ編集のイベントが追加されていればtrue
 var inputcount = 0; // 入力欄の番号
-var tag_suggest_id = null;
+//var tag_suggest_id = null;
+var tag_suggest_ids = [];
 // 読み込み
 function loadJSON(str, cb) {
   chrome.extension.sendRequest({name: "loadJSON", str: str}, cb);
@@ -234,17 +235,22 @@ function main() {
   // タグ編集 tag_editを監視
   // 複数の入力欄に対処できない!!!!! 完了
   if (page == "video") {
-    var tagedit = document.getElementsByClassName("tag_edit")[0];
-    //console.log(tagedit);
+    var tagedit = document.getElementById("WATCHHEADER");
     if (tagedit != [] && tagedit != undefined) {
       tagedit.addEventListener("DOMSubtreeModified", function() {
         if (!tag_event_added) {
-          tag_suggest_id = makesuggest(document.getElementsByName("tag")[0]);
+          //tag_suggest_id = makesuggest(document.getElementById("tagedit_input"));
+          tag_suggest_ids.push(makesuggest(document.getElementById("tagedit_input")));
           tag_event_added = true;
         }
         else {
           // タグ編集欄が消えた時
-          document.body.removeChild(document.getElementById("suggestelem_" + tag_suggest_id.toString()));
+          for (var i in tag_suggest_ids) {
+            if (document.getElementById("suggestelem_" + tag_suggest_ids[i].toString()) != null) {
+              document.body.removeChild(document.getElementById("suggestelem_" + tag_suggest_ids[i].toString()));
+              tag_suggest_ids.splice(i, 1);
+            }
+          }
           tag_event_added = false;
         }
       });
