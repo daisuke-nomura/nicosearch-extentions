@@ -1,0 +1,24 @@
+<html>
+<body onload="restore()">
+<form name="tab">
+<input type="checkbox" onclick="save()">サジェストを開く際に新しいタブで開く</input><br>
+<input type="checkbox" onclick="save()">大百科を開く際に新しいタブで開く</input><br>
+</form>
+<script>
+function restore() {
+	var chk = localStorage.getItem("newTab");
+	if (chk == "true")
+		document.tab.elements[0].checked = true;
+
+	chk = localStorage.getItem("newTab1");
+	if (chk == "true")
+		document.tab.elements[1].checked = true;
+}
+
+function save() {
+	localStorage.setItem("newTab", document.tab.elements[0].checked);
+	localStorage.setItem("newTab1", document.tab.elements[1].checked);
+}
+</script>
+</body>
+</html>

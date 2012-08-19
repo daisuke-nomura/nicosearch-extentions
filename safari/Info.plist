@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>nicotools</string>
+	<key>Builder Version</key>
+	<string>534.57.2</string>
+	<key>CFBundleDisplayName</key>
+	<string>nicosearch</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.nicotools.nicosearch.safari</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Global Page</key>
+		<string>global.html</string>
+	</dict>
+	<key>Content</key>
+	<dict>
+		<key>Scripts</key>
+		<dict>
+			<key>End</key>
+			<array>
+				<string>cs.js</string>
+				<string>global.js</string>
+			</array>
+		</dict>
+		<key>Whitelist</key>
+		<array>
+			<string>http://www.nicovideo.jp/*</string>
+			<string>http://seiga.nicovideo.jp/*</string>
+			<string>http://live.nicovideo.jp/*</string>
+			<string>http://dic.nicovideo.jp/*</string>
+		</array>
+	</dict>
+	<key>Description</key>
+	<string>ニコニコ動画でサジェストを使うnicosearchのChrome拡張</string>
+	<key>ExtensionInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>Permissions</key>
+	<dict>
+		<key>Website Access</key>
+		<dict>
+			<key>Allowed Domains</key>
+			<array>
+				<string>nicotools.com</string>
+				<string>*.nicovideo.jp</string>
+			</array>
+			<key>Level</key>
+			<string>Some</string>
+		</dict>
+	</dict>
+	<key>Update Manifest URL</key>
+	<string>http://nicotools.com/extensions/nicosearch-safari-manifest.plist</string>
+	<key>Website</key>
+	<string>http://nicotools.com</string>
+</dict>
+</plist>
