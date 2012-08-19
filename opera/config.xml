@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" id="nicosearch" defaultlocale="jp">
+	<name>nicosearch</name>
+	<description xml:lang="jp">nicosearch for Opera</description>
+	<author href="http://nicotools.com/">nicotools</author>
+	<icon src="images/icon_64.png"/>
+    <icon src="images/icon_18.png"/>
+    <access origin="http://nicotools.com/" subdomains="true"/>
+</widget>

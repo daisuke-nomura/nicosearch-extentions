@@ -1,15 +1,19 @@
 {
   "name": "nicosearch Chrome版",
-  "version": "2.5",
+  "version": "2.2.9",
   "description": "ニコニコ動画でサジェストを使うnicosearchのChrome拡張",
   "icons": {
+    "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon.png"
   },
   "permissions": [
-    "http://nicotools.com/"
+    "http://nicotools.com/",
+    "tabs",
+    "contextMenus"
   ],
   "background_page": "bg.html",
+  "options_page": "option.html",
   "content_scripts": [
     {
       "matches": [
@@ -19,8 +23,10 @@
         "http://dic.nicovideo.jp/*"
       ],
       "js": ["cs.js"],
-      "css": ["suggest.css"],
       "run_at": "document_end"
     }
-  ]
+  ],
+  "omnibox": {
+    "keyword" : "ns"
+  }
 }

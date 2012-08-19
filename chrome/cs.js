@@ -16,9 +16,20 @@ var tag_event_added = false; // タグ編集のイベントが追加されてい
 var inputcount = 0; // 入力欄の番号
 //var tag_suggest_id = null;
 var tag_suggest_ids = [];
+var new_tab_open  = false;
+
 // 読み込み
 function loadJSON(str, cb) {
   chrome.extension.sendRequest({name: "loadJSON", str: str}, cb);
+}
+//function loadRelateJSON(str, cb) {
+  //chrome.extension.sendRequest({name: "loadRelateJSON", str: str}, cb);//拡張
+//}
+function loadNewTabSetting() {
+  chrome.extension.sendRequest({name: "loadNewTabSetting", str: "bbb"}, function(response){
+    if (response == "true")
+		new_tab_open = true;
+  });
 }
 /*function loadJSON(str, cb) {
   cb(["あああ", "いいい", "ううう"]);
@@ -41,7 +52,7 @@ function pos(elem) {
 }
 // strが全て空白ならtrue
 function all_space(str) {
-  for (var i = 0; i < str.length; i++) {
+  for (var i = 0, c = str.length; i < c; i++) {
     if (str.charAt(i) != " ") {
       return false;
     }
@@ -49,7 +60,7 @@ function all_space(str) {
   return true;
 }
 // 候補表示
-function show_suggest(res, id) {
+function show_suggest(res, id, suggest, buffArray, input) {
   vals = values[id]
   // 候補が無い場合は前の結果を残す
   if (res == [] || res == false) {
@@ -66,6 +77,9 @@ function show_suggest(res, id) {
   var suggestElem = document.createElement("div");
   suggestElem.id = "suggestelem_" + id;
   suggestElem.className = "suggestbox";
+  suggestElem.style.zIndex = 100000;
+  suggestElem.style.border = "solid #778899 1px";
+  
   var inputpos = pos(vals.input);
   suggestElem.style.position = "absolute";
   //suggestElem.style.paddingLeft = "3px";
@@ -75,9 +89,33 @@ function show_suggest(res, id) {
   suggestElem.style.backgroundColor = "#ffffff";
   suggestElem.style.minWidth = "" + vals.input.offsetWidth + "px";
   suggestElem.style.textAlign = "left";
-  for (var i = 0; i < res.length; i++) {
+  document.body.appendChild(suggestElem);
+  
+  for (var i = 0, c = res.length; i < c; i++) {
+    var d = document.createElement("div");
+    var h = document.createElement("a");
+    h.href = "http://dic.nicovideo.jp/a/" + res[i];
+    if (new_tab_open)
+	  h.target = "_blank";
+	  
+	var img = document.createElement("img");
+    img.src = chrome.extension.getURL("favicon.png");
+    img.align = "left";
+    img.style.paddingTop = "1px";
+    img.style.paddingBottom = "1px";  
+	h.appendChild(img);
+    d.appendChild(h);
+  
     var p = document.createElement("p");
-    p.style.paddingLeft = "3px";
+    p.style.paddingLeft = "17px";//3pxだった
+    //p.style.paddingTop = "0px"; //特定環境下でサジェストが斜めになる問題
+	if(location.host == "live.nicovideo.jp" || location.host == "seiga.nicovideo.jp") {	// ホストがlive.nicovideo.jpか否かで振り分け
+		p.style.paddingTop = "2px";
+		p.style.height = "16px";
+	} else { 
+		p.style.height = "18px";
+		p.style.fontSize = "14px";
+	}
     //p.style.display = "block";
     // クリックした時
     p.addEventListener("click", function(e) {
@@ -113,6 +151,7 @@ function show_suggest(res, id) {
       }
       // 動画関係のページやその他用
       form.submit();
+	  //return false;
       /*var evt = document.createEvent("UIEvents");
       evt.initUIEvent("keypress", true, true, window, 0);
       evt.keyCode = 13;
@@ -129,8 +168,23 @@ function show_suggest(res, id) {
     p.addEventListener("mouseout", function(e) {
       e.target.style.backgroundColor = "#ffffff";
     });
-    p.appendChild(document.createTextNode(res[i]));
-    suggestElem.appendChild(p);
+    if (suggest) {
+	if (buffArray == null)
+	    p.appendChild(document.createTextNode(res[i]));
+        else {
+	    var buff = "";
+
+	    for (var j = 0, c2 = buffArray.length; j < c2; j++) {
+		buff += buffArray[j] + " ";
+	    }
+	    buff += res[i];
+	    p.appendChild(document.createTextNode(buff));
+        }
+    } else {
+      p.appendChild(document.createTextNode(res[i]));//関連タグ用の拡張がここにくる
+    }
+    d.appendChild(p);
+    suggestElem.appendChild(d);
   }
   // nicotools.comへのリンク
   var link = document.createElement("a");
@@ -140,7 +194,8 @@ function show_suggest(res, id) {
   link.style.float = "right";
   link.appendChild(document.createTextNode("Powered by nicotools.com"));
   suggestElem.appendChild(link);
-  document.body.appendChild(suggestElem);
+  //suggestElem.style.zIndex = 100000;
+  //suggestElem.style.border = "solid #778899 1px";
   vals.suggestlength = res.length;
 }
 // 上下が押された時 upがtrueなら上
@@ -148,10 +203,10 @@ function updown(up, id) {
   up = !up;
   vals = values[id];
   if (vals.selected == null) {
-    vals.selected = 0;
+    vals.selected = -1;
   }
   var suggestElem = document.getElementById("suggestelem_" + id);
-  var nextElem = suggestElem.childNodes(vals.selected + 1);
+  var nextElem = suggestElem.childNodes[vals.selected + 1];
   if (vals.selected == null) {
     vals.selected = 0;
   } else if (up) {
@@ -161,20 +216,20 @@ function updown(up, id) {
   }
   if (vals.selected < 0) {
     vals.selected = vals.suggestlength - 1;
-    suggestElem.childNodes(0).style.backgroundColor = "#ffffff";
+    suggestElem.childNodes[0].style.backgroundColor = "#ffffff";
   } else if (vals.selected >= vals.suggestlength) {
     vals.selected = 0;
   }
-  if (up && suggestElem.childNodes(vals.selected - 1)) {
-    suggestElem.childNodes(vals.selected - 1).style.backgroundColor = "#ffffff";
-  } else if (suggestElem.childNodes(vals.selected + 1) && nextElem.tagName != "A") {
-    suggestElem.childNodes(vals.selected + 1).style.backgroundColor = "#ffffff";
+  if (up && suggestElem.childNodes[vals.selected - 1]) {
+    suggestElem.childNodes[vals.selected - 1].style.backgroundColor = "#ffffff";
+  } else if (suggestElem.childNodes[vals.selected + 1] && nextElem.tagName != "A") {
+    suggestElem.childNodes[vals.selected + 1].style.backgroundColor = "#ffffff";
   }
   if (vals.selected != vals.suggestlength - 1) {
-    suggestElem.childNodes(vals.suggestlength - 1).style.backgroundColor = "#ffffff";
+    suggestElem.childNodes[vals.suggestlength - 1].style.backgroundColor = "#ffffff";
   }
-  suggestElem.childNodes(vals.selected).style.backgroundColor = "#afeeee";
-  vals.input.value = suggestElem.childNodes(vals.selected).innerHTML;
+  suggestElem.childNodes[vals.selected].style.backgroundColor = "#afeeee";
+  vals.input.value = suggestElem.childNodes[vals.selected].childNodes[1].innerHTML;
 }
 // DOM要素inputでサジェストを有効化
 function makesuggest(input) {
@@ -187,80 +242,156 @@ function makesuggest(input) {
   values[id]["suggestlength"] = null; //現在表示されている候補の数
   values[id]["input"] = input;
 
-  input.addEventListener("keydown", function(e) {
+  //input.addEventListener("click", function(e) {
+    //loadRelateJSON(input.value, function (arr) { show_suggest(arr, id, false); });//表示のためにcallbackを変える必要がある
+    //loadJSON(input.value, function (arr) { show_suggest(arr, id, true); });
+  //});
+
+  input.addEventListener("keyup", function(e) {
+    //if (input.value == "sm9")
+    //{
+    //    window.open("http://www.nicovideo.jp/watch/sm9", "_self");
+    //    return;
+    //}
+  
     if (e.keyCode == 38) {
       updown(true, id);
       return;
     } else if (e.keyCode == 40) {
       updown(false, id);
       return;
-    }
+    } else if (e.keyCode == 8 && input.value == "") {//入力された文字が無くなった時にサジェストを消す
+        for (var i = 0, c = values.length; i < c; i++) {
+            var suggestElem = document.getElementById("suggestelem_" + i.toString());
+            if (suggestElem == null) {
+                return;
+            }
+            document.body.removeChild(suggestElem);
+        }
+    }// else if (e.keyCode == 32) {//サジェストを分ける
+    //}
+
     inputvalue = input.value;
-    loadJSON(input.value, function (arr) { show_suggest(arr, id); });
+    var buff = "";
+    var buffArray = null;
+    for (var i = 0, j = 0, c = inputvalue.length; i < c; i++) {
+	if (inputvalue[i] == " " || inputvalue[i] == "　") {
+	    if (buffArray == null)
+		buffArray = new Array();
+	    buffArray[j] = buff;
+	    j++;
+	    buff = "";
+	}
+	else
+	    buff += inputvalue[i];
+    }
+
+    //if (e.keyCode == 32) {
+      //input.valueをサーバに投げて関連タグを呼び出す
+      //loadRelateJSON(input.value, function (arr) { show_suggest(arr, id, false); });//表示のためにcallbackを変える必要がある
+    //} else {
+      loadJSON(buff, function (arr) { show_suggest(arr, id, true, buffArray, input); });
+    //}
   });
   input.setAttribute("autocomplete", "off");
-  inputcount = inputcount + 1;
+  inputcount++;
   return id;
 }
 
 function main() {
+  loadNewTabSetting();
   // video_top, その他動画関係, 静画など
   input = document.getElementById("bar_search");
   page = "video";
+  var inputz = null;
+  
+  if (input != undefined) {
+    var flvplayer = document.getElementById("flvplayer");
+    if (flvplayer != undefined)
+        flvplayer.setAttribute("wmode", "transparent"); 
+  }
   // 全体のトップページ
-  if (input == null) {
+  if (input == undefined) {
     page = "top"
     input = document.getElementById("searchWord");
   }
   // キーワード検索結果
-  if (input == null) {
+  if (input == undefined) {
     page = "keyword";
     input = document.getElementById("search_united");
   }
   // 生放送
-  if (input == null) {
+  if (input == undefined) {
     page = "live";
     input = document.getElementById("search_target");
   }
   // 大百科
-  if (input == null) {
+  if (input == undefined) {
     page = "dic";
-    input = document.getElementsByName("q")[0];
+    input = document.getElementById("search-box");
   }
   // マイページ
-  if (input == null) {
+  if (input == undefined) {
     page = "my";
     input = document.getElementsByClassName("miniSearchWord")[0];
+  }
+  if (input == undefined) {
+	page = "video2";
+	inputz = new Array();
+	
+	//try {
+		var inp = document.getElementsByClassName("searchText")[0];
+		if (inp != undefined)
+			inputz[0] = inp.children[1];
+		inp = document.getElementsByClassName("searchText")[1];
+		if (inp != undefined)
+			inputz[1] = inp.children[1];
+	//} catch (e)
+	//{}
   }
   // タグ編集 tag_editを監視
   // 複数の入力欄に対処できない!!!!! 完了
   if (page == "video") {
+    //var tagedit = document.getElementsByClassName("tag_edit")[0];
     var tagedit = document.getElementById("WATCHHEADER");
+    //console.log(tagedit);
     if (tagedit != [] && tagedit != undefined) {
       tagedit.addEventListener("DOMSubtreeModified", function() {
         if (!tag_event_added) {
-          //tag_suggest_id = makesuggest(document.getElementById("tagedit_input"));
+          //tag_suggest_id = makesuggest(document.getElementsByName("tag")[0]);
           tag_suggest_ids.push(makesuggest(document.getElementById("tagedit_input")));
-          tag_event_added = true;
+	  tag_event_added = true;
         }
         else {
           // タグ編集欄が消えた時
+          //document.body.removeChild(document.getElementById("suggestelem_" + tag_suggest_id.toString()));
           for (var i in tag_suggest_ids) {
-            if (document.getElementById("suggestelem_" + tag_suggest_ids[i].toString()) != null) {
-              document.body.removeChild(document.getElementById("suggestelem_" + tag_suggest_ids[i].toString()));
-              tag_suggest_ids.splice(i, 1);
-            }
-          }
-          tag_event_added = false;
+		if (document.getElementById("suggestelem_" + tag_suggest_ids[i].toString()) != null) {
+			document.body.removeChild(document.getElementById("suggestelem_" + tag_suggest_ids[i].toString()));
+			tag_suggest_ids.splice(i, 1);
+		}
+	  }
+	  tag_event_added = false;
         }
       });
     }
   }
+  else if (page == "video2") {
+	var target = document.getElementById("tagEditContainer").children[0].children[0].children[0];
+	makesuggest(target);
+  }
+  // Zero対応
+  if (input == null && inputz != null) {
+	for (var i = 0, c = inputz.length; i < c; i++) {
+		makesuggest(inputz[i]);
+	}
+  }
   // 入力欄が無い場合は何もしない
-  if (input == null) {
+  else if (input == null) {
     return;
   }
-  makesuggest(input);
+  else
+	makesuggest(input);
   /*
   input.addEventListener("keydown", function(e) {
     if (e.keyCode == 38) {
@@ -286,7 +417,7 @@ document.body.addEventListener("click", function(e) {
   x = e.x;
   y = e.y;
   // 修正必要 done
-  for (var i = 0; i < values.length; i++) {
+  for (var i = 0, c = values.length; i < c; i++) {
     var suggestElem = document.getElementById("suggestelem_" + i.toString());
     if (suggestElem == null) {
       return;
