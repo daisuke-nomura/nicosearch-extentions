@@ -20,7 +20,7 @@ var new_tab_open  = false;
 
 // 読み込み
 function loadJSON(str, cb) {
-  chrome.extension.sendRequest({name: "loadJSON", str: str}, cb);
+  chrome.extension.sendRequest({name: "loadJSON2", str: str}, cb);
 }
 //function loadRelateJSON(str, cb) {
   //chrome.extension.sendRequest({name: "loadRelateJSON", str: str}, cb);//拡張

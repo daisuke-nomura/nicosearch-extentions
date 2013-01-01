@@ -14,7 +14,7 @@
     "contextMenus"
   ],
   "background": {
-	"page":"bg.html"
+	"scripts":["bg.js"]
   },
   "options_page": "option.html",
   "content_scripts": [
