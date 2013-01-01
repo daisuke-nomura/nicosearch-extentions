@@ -1,6 +1,7 @@
 {
+  "manifest_version": 2,
   "name": "nicosearch Chrome版",
-  "version": "2.2.9",
+  "version": "2.3.0",
   "description": "ニコニコ動画でサジェストを使うnicosearchのChrome拡張",
   "icons": {
     "16": "icon16.png",
@@ -12,7 +13,9 @@
     "tabs",
     "contextMenus"
   ],
-  "background_page": "bg.html",
+  "background": {
+	"page":"bg.html"
+  },
   "options_page": "option.html",
   "content_scripts": [
     {
@@ -28,5 +31,8 @@
   ],
   "omnibox": {
     "keyword" : "ns"
-  }
+  },
+  "web_accessible_resources": [
+    "favicon.png"
+  ]
 }
