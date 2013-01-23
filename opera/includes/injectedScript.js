@@ -153,7 +153,7 @@ function show_suggest(res, id, suggest, buffArray, input) {
   for (var i = 0, c = res.length; i < c; i++) {
     var d = document.createElement("div");
     var h = document.createElement("a");
-    h.href = "http://dic.nicovideo.jp/a/" + res[i];
+    h.href = "http://dic.nicovideo.jp/a/" + encodeURIComponent(res[i]);
     if (new_tab_open)
 	  h.target = "_blank";
 	  
