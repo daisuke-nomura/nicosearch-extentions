@@ -20,13 +20,15 @@ var new_tab_open  = false;
 
 // 読み込み
 function loadJSON(str, cb) {
-  chrome.extension.sendRequest({name: "loadJSON", str: str}, cb);
+  chrome.runtime.sendMessage({name: "loadJSON", str: str}, cb);
+//  chrome.extension.sendRequest({name: "loadJSON", str: str}, cb);
 }
 //function loadRelateJSON(str, cb) {
   //chrome.extension.sendRequest({name: "loadRelateJSON", str: str}, cb);//拡張
 //}
 function loadNewTabSetting() {
-  chrome.extension.sendRequest({name: "loadNewTabSetting", str: "bbb"}, function(response){
+  chrome.runtime.sendMessage({name: "loadNewTabSetting"}, function(response){
+//  chrome.extension.sendRequest({name: "loadNewTabSetting", str: "bbb"}, function(response){
     if (response == "true")
 		new_tab_open = true;
   });
